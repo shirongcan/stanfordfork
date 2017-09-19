@@ -31,7 +31,7 @@ def get_lines():
     with open(file_path, 'rb') as f:
         lines = f.readlines()
         for line in lines:
-            parts = line.split(' +++$+++ ')
+            parts = line.split(b' +++$+++ ')
             if len(parts) == 5:
                 if parts[4][-1] == '\n':
                     parts[4] = parts[4][:-1]
@@ -44,10 +44,10 @@ def get_convos():
     convos = []
     with open(file_path, 'rb') as f:
         for line in f.readlines():
-            parts = line.split(' +++$+++ ')
+            parts = line.split(b' +++$+++ ')
             if len(parts) == 4:
                 convo = []
-                for line in parts[3][1:-2].split(', '):
+                for line in parts[3][1:-2].split(b', '):
                     convo.append(line[1:-1])
                 convos.append(convo)
 
@@ -77,11 +77,11 @@ def prepare_dataset(questions, answers):
 
     for i in range(len(questions)):
         if i in test_ids:
-            files[2].write(questions[i] + '\n')
-            files[3].write(answers[i] + '\n')
+            files[2].write(questions[i] + b'\n')
+            files[3].write(answers[i] + b'\n')
         else:
-            files[0].write(questions[i] + '\n')
-            files[1].write(answers[i] + '\n')
+            files[0].write(questions[i] + b'\n')
+            files[1].write(answers[i] + b'\n')
 
     for file in files:
         file.close()
@@ -96,13 +96,13 @@ def make_dir(path):
 def basic_tokenizer(line, normalize_digits=True):
     """ A basic tokenizer to tokenize text into tokens.
     Feel free to change this to suit your need. """
-    line = re.sub('<u>', '', line)
-    line = re.sub('</u>', '', line)
-    line = re.sub('\[', '', line)
-    line = re.sub('\]', '', line)
+    line = re.sub(b'<u>', b'', line)
+    line = re.sub(b'</u>', b'', line)
+    line = re.sub(b'\[', b'', line)
+    line = re.sub(b'\]', b'', line)
     words = []
     _WORD_SPLIT = re.compile(b"([.,!?\"'-<>:;)(])")
-    _DIGIT_RE = re.compile(r"\d")
+    _DIGIT_RE = re.compile(b"\d")
     for fragment in line.strip().lower().split():
         for token in re.split(_WORD_SPLIT, fragment):
             if not token:
@@ -126,20 +126,20 @@ def build_vocab(filename, normalize_digits=True):
 
     sorted_vocab = sorted(vocab, key=vocab.get, reverse=True)
     with open(out_path, 'wb') as f:
-        f.write('<pad>' + '\n')
-        f.write('<unk>' + '\n')
-        f.write('<s>' + '\n')
-        f.write('<\s>' + '\n') 
+        f.write(b'<pad>' + b'\n')
+        f.write(b'<unk>' + b'\n')
+        f.write(b'<s>' + b'\n')
+        f.write(b'<\s>' + b'\n') 
         index = 4
         for word in sorted_vocab:
             if vocab[word] < config.THRESHOLD:
                 with open('config.py', 'ab') as cf:
                     if filename[-3:] == 'enc':
-                        cf.write('ENC_VOCAB = ' + str(index) + '\n')
+                        cf.write(b'ENC_VOCAB = ' + bytes([index]) + b'\n')
                     else:
-                        cf.write('DEC_VOCAB = ' + str(index) + '\n')
+                        cf.write(b'DEC_VOCAB = ' + bytes([index]) + b'\n')
                 break
-            f.write(word + '\n')
+            f.write(word + b'\n')
             index += 1
 
 def load_vocab(vocab_path):
